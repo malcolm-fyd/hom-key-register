@@ -3,6 +3,25 @@ export default {
         const url = new URL(request.url);
         const path = url.pathname;
 
+        // --- Handle CORS Preflight Requests ---
+        if (request.method === 'OPTIONS') {
+            return new Response(null, {
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                },
+            });
+        }
+
+        // --- All other requests ---
+        const headers = {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+        };
+
         // API for signing a key out
         if (request.method === 'POST' && path === '/api/sign-out') {
             try {
@@ -10,7 +29,7 @@ export default {
                 const { name, business, mobile, keyNumber, keyType, apartmentNumber, signature } = data;
 
                 if (!name || !mobile || !keyNumber || !keyType || !signature) {
-                    return new Response(JSON.stringify({ message: 'Missing required fields' }), { status: 400 });
+                    return new Response(JSON.stringify({ message: 'Missing required fields' }), { status: 400, headers: headers });
                 }
 
                 const stmt = env.DB.prepare(
@@ -29,13 +48,11 @@ export default {
                     Date.now()
                 ).run();
 
-                return new Response(JSON.stringify({ success: true }), {
-                    headers: { 'Content-Type': 'application/json' },
-                });
+                return new Response(JSON.stringify({ success: true }), { status: 200, headers: headers });
 
             } catch (error) {
                 console.error('Sign-out error:', error);
-                return new Response(JSON.stringify({ message: 'Error processing sign-out request' }), { status: 500 });
+                return new Response(JSON.stringify({ message: 'Error processing sign-out request' }), { status: 500, headers: headers });
             }
         }
 
@@ -46,7 +63,7 @@ export default {
                 const { keyNumber, signature } = data;
 
                 if (!keyNumber || !signature) {
-                    return new Response(JSON.stringify({ message: 'Missing key number or signature' }), { status: 400 });
+                    return new Response(JSON.stringify({ message: 'Missing key number or signature' }), { status: 400, headers: headers });
                 }
 
                 // Find the most recent 'OUT' record for the key
@@ -56,7 +73,7 @@ export default {
                 const { results } = await stmt.bind(keyNumber).all();
 
                 if (results.length === 0) {
-                    return new Response(JSON.stringify({ message: 'No matching key found to sign in.' }), { status: 404 });
+                    return new Response(JSON.stringify({ message: 'No matching key found to sign in.' }), { status: 404, headers: headers });
                 }
                 
                 const keyToUpdateId = results[0].id;
@@ -67,12 +84,10 @@ export default {
                 );
                 await updateStmt.bind(signature, Date.now(), keyToUpdateId).run();
 
-                return new Response(JSON.stringify({ success: true }), {
-                    headers: { 'Content-Type': 'application/json' },
-                });
+                return new Response(JSON.stringify({ success: true }), { status: 200, headers: headers });
             } catch (error) {
                 console.error('Sign-in error:', error);
-                return new Response(JSON.stringify({ message: 'Error processing sign-in request' }), { status: 500 });
+                return new Response(JSON.stringify({ message: 'Error processing sign-in request' }), { status: 500, headers: headers });
             }
         }
 
@@ -85,16 +100,14 @@ export default {
                      ORDER BY timestamp_out DESC`
                 ).all();
 
-                return new Response(JSON.stringify(results), {
-                    headers: { 'Content-Type': 'application/json' },
-                });
+                return new Response(JSON.stringify(results), { status: 200, headers: headers });
             } catch (error) {
                 console.error('Report generation error:', error);
-                return new Response(JSON.stringify({ message: 'Error fetching report data' }), { status: 500 });
+                return new Response(JSON.stringify({ message: 'Error fetching report data' }), { status: 500, headers: headers });
             }
         }
         
         // Return a 404 for unknown routes
-        return new Response('Not Found', { status: 404 });
+        return new Response('Not Found', { status: 404, headers: headers });
     }
 };
