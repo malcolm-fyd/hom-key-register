@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS key_log (
+  id INTEGER PRIMARY KEY,
+  name TEXT NOT NULL,
+  business TEXT,
+  mobile TEXT NOT NULL,
+  key_number TEXT NOT NULL,
+  key_type TEXT NOT NULL,
+  apartment_number TEXT,
+  signature_out TEXT,
+  signature_in TEXT,
+  timestamp_out INTEGER NOT NULL,
+  timestamp_in INTEGER,
+  status TEXT NOT NULL
+);
