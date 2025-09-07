@@ -94,10 +94,25 @@
             margin-bottom: 20px;
         }
 
+        /* --- Grid Layout for Forms --- */
+        .key-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Two columns, equal width */
+            gap: 20px; /* Space between grid items */
+        }
+        
         .key-form .input-group {
             text-align: left;
-            margin-bottom: 20px;
+            margin-bottom: 0; /* Remove default margin as gap handles spacing */
         }
+
+        /* Span all columns for specific elements like apartment number or buttons */
+        #apartment-group,
+        #sign-out-button,
+        #sign-in-button {
+            grid-column: span 2; /* Make these elements span both columns */
+        }
+        /* End Grid Layout */
 
         .key-form label {
             display: block;
@@ -221,6 +236,17 @@
             .report-table th, .report-table td { border-color: #000; }
             @page { size: A4 portrait; margin: 1cm; }
         }
+        /* Responsive adjustments for smaller screens (e.g., mobile) */
+        @media (max-width: 600px) {
+            .key-form {
+                grid-template-columns: 1fr; /* Single column on small screens */
+            }
+            #apartment-group,
+            #sign-out-button,
+            #sign-in-button {
+                grid-column: span 1; /* Back to single column span */
+            }
+        }
     </style>
 </head>
 <body>
@@ -249,248 +275,4 @@
                 </div>
                 <div class="input-group">
                     <label for="key-number">Key Number</label>
-                    <input type="text" id="key-number" name="key-number" required>
-                </div>
-                <div class="input-group">
-                    <label for="key-type">Key Type</label>
-                    <select id="key-type" name="key-type" required>
-                        <option value="">-- Select a Key Type --</option>
-                        <option value="lift">Lift</option>
-                        <option value="master">Master</option>
-                        <option value="roof">Roof</option>
-                        <option value="apartment">Apartment</option>
-                    </select>
-                </div>
-                <div id="apartment-group" class="input-group" style="display:none;">
-                    <label for="apartment-number">Apartment Number</label>
-                    <input type="text" id="apartment-number" name="apartment-number">
-                </div>
-                <button type="button" id="sign-out-button" class="btn btn-primary">Sign Out</button>
-                <input type="hidden" id="signature-out-data">
-            </form>
-        </div>
-
-        <div id="sign-in-form" class="form-card" style="display:none;">
-            <h1 class="title">Return Key</h1>
-            <form id="return-form" class="key-form">
-                <div class="input-group">
-                    <label for="return-key-number">Key Number</label>
-                    <input type="text" id="return-key-number" name="return-key-number" required>
-                </div>
-                <button type="button" id="sign-in-button" class="btn btn-primary">Return</button>
-                <input type="hidden" id="signature-in-data">
-            </form>
-        </div>
-
-        <div id="report-page" class="report-page">
-            <h2>Key Activity Report</h2>
-            <p id="report-date"></p>
-            <table class="report-table">
-                <thead>
-                    <tr>
-                        <th>Date & Time Out</th>
-                        <th>Name</th>
-                        <th>Business</th>
-                        <th>Mobile</th>
-                        <th>Key #</th>
-                        <th>Key Type</th>
-                        <th>Signature Out</th>
-                        <th>Date & Time In</th>
-                        <th>Signature In</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="report-body">
-                    <tr><td colspan="10">Loading data...</td></tr>
-                </tbody>
-            </table>
-            <div style="text-align:center; margin-top:20px;">
-                <button class="btn btn-secondary" onclick="window.print()">Print Report</button>
-            </div>
-        </div>
-
-    </div>
-
-    <div id="signature-modal" class="modal">
-        <div class="modal-content">
-            <h2 class="modal-title">Please Sign Below</h2>
-            <canvas id="signature-pad" width="400" height="200"></canvas>
-            <div class="modal-buttons">
-                <button id="clear-button" class="btn btn-danger">Clear</button>
-                <button id="save-button" class="btn btn-primary">Save & Close</button>
-            </div>
-        </div>
-    </div>
-    
-    <div style="margin-top:20px;">
-        <button id="show-sign-out-btn" class="btn btn-primary">Sign Out Key</button>
-        <button id="show-sign-in-btn" class="btn btn-primary">Return Key</button>
-        <button id="show-report-btn" class="btn btn-primary">View Report</button>
-    </div>
-
-    <div class="footer">
-        <p>&copy; 2024 Your Company. All Rights Reserved.</p>
-        <p>Version: 1.0.0</p>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
-
-    <script>
-        const API_URL = window.location.origin;
-
-        // --- View & Navigation Logic ---
-        const signOutFormSection = document.getElementById('sign-out-form');
-        const signInFormSection = document.getElementById('sign-in-form');
-        const reportPageSection = document.getElementById('report-page');
-
-        document.getElementById('show-sign-out-btn').addEventListener('click', () => {
-            signOutFormSection.style.display = 'block';
-            signInFormSection.style.display = 'none';
-            reportPageSection.style.display = 'none';
-        });
-
-        document.getElementById('show-sign-in-btn').addEventListener('click', () => {
-            signOutFormSection.style.display = 'none';
-            signInFormSection.style.display = 'block';
-            reportPageSection.style.display = 'none';
-        });
-
-        document.getElementById('show-report-btn').addEventListener('click', async () => {
-            signOutFormSection.style.display = 'none';
-            signInFormSection.style.display = 'none';
-            reportPageSection.style.display = 'block';
-            await generateReport();
-        });
-
-        // --- Signature Pad Logic ---
-        const signatureModal = document.getElementById('signature-modal');
-        const signaturePadCanvas = document.getElementById('signature-pad');
-        const signaturePad = new SignaturePad(signaturePadCanvas);
-        const clearButton = document.getElementById('clear-button');
-        const saveButton = document.getElementById('save-button');
-        let currentSignatureTarget = null;
-
-        document.getElementById('sign-out-button').addEventListener('click', () => {
-            currentSignatureTarget = 'out';
-            showSignatureModal();
-        });
-
-        document.getElementById('sign-in-button').addEventListener('click', () => {
-            currentSignatureTarget = 'in';
-            showSignatureModal();
-        });
-
-        function showSignatureModal() {
-            signatureModal.style.display = 'flex';
-            signaturePad.clear();
-            setTimeout(() => {
-                const ratio = Math.max(window.devicePixelRatio || 1, 1);
-                signaturePadCanvas.width = signaturePadCanvas.offsetWidth * ratio;
-                signaturePadCanvas.height = signaturePadCanvas.offsetHeight * ratio;
-                signaturePadCanvas.getContext("2d").scale(ratio, ratio);
-            }, 100);
-        }
-
-        clearButton.addEventListener('click', () => signaturePad.clear());
-
-        saveButton.addEventListener('click', () => {
-            if (signaturePad.isEmpty()) {
-                alert('Please provide a signature.');
-            } else {
-                const signatureData = signaturePad.toDataURL();
-                if (currentSignatureTarget === 'out') {
-                    document.getElementById('signature-out-data').value = signatureData;
-                    submitForm('out');
-                } else if (currentSignatureTarget === 'in') {
-                    document.getElementById('signature-in-data').value = signatureData;
-                    submitForm('in');
-                }
-                signatureModal.style.display = 'none';
-            }
-        });
-
-        // --- Form Submission Logic ---
-        async function submitForm(type) {
-            const formData = {};
-            let url = '';
-            
-            if (type === 'out') {
-                formData.name = document.getElementById('name').value;
-                formData.business = document.getElementById('business').value;
-                formData.mobile = document.getElementById('mobile').value;
-                formData.keyNumber = document.getElementById('key-number').value;
-                formData.keyType = document.getElementById('key-type').value;
-                const aptInput = document.getElementById('apartment-number');
-                formData.apartmentNumber = aptInput.style.display === 'block' ? aptInput.value : '';
-                formData.signature = document.getElementById('signature-out-data').value;
-                url = `${API_URL}/api/sign-out`;
-                
-                if (!formData.name || !formData.mobile || !formData.keyNumber || !formData.keyType || !formData.signature) {
-                    alert('Please fill out all required fields and provide a signature.');
-                    return;
-                }
-            } else if (type === 'in') {
-                formData.keyNumber = document.getElementById('return-key-number').value;
-                formData.signature = document.getElementById('signature-in-data').value;
-                url = `${API_URL}/api/sign-in`;
-
-                if (!formData.keyNumber || !formData.signature) {
-                    alert('Please enter a key number and provide a signature.');
-                    return;
-                }
-            }
-
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData),
-                });
-
-                const responseData = await response.json();
-
-                if (response.ok) {
-                    alert(`Key successfully ${type === 'out' ? 'signed out' : 'returned'}.`);
-                    document.getElementById('key-form').reset();
-                    document.getElementById('return-form').reset();
-                    document.getElementById('signature-out-data').value = '';
-                    document.getElementById('signature-in-data').value = '';
-                } else {
-                    alert(`Error: ${responseData.message || response.statusText}`);
-                }
-            } catch (error) {
-                console.error('Submission failed:', error);
-                alert('An error occurred. Please try again.');
-            }
-        }
-
-        // --- Dynamic UI Logic ---
-        document.getElementById('key-type').addEventListener('change', (e) => {
-            document.getElementById('apartment-group').style.display = e.target.value === 'apartment' ? 'block' : 'none';
-        });
-
-        // --- Report Generation Logic ---
-        async function generateReport() {
-            document.getElementById('report-body').innerHTML = '<tr><td colspan="10">Loading data...</td></tr>';
-            document.getElementById('report-date').textContent = `Report generated on ${new Date().toLocaleString()}`;
-
-            try {
-                const response = await fetch(`${API_URL}/api/report`);
-                if (!response.ok) throw new Error('Failed to fetch report data.');
-                
-                const data = await response.json();
-                const reportBody = document.getElementById('report-body');
-                reportBody.innerHTML = '';
-
-                if (data.length === 0) {
-                    reportBody.innerHTML = '<tr><td colspan="10">No key activity found.</td></tr>';
-                    return;
-                }
-
-                data.forEach(item => {
-                    const row = document.createElement('tr');
-                    
-                    const signatureOutImg = item.signature_out ? `<img src="${item.signature_out}" class="signature-img">` : 'N/A';
-                    const signatureInImg = item.signature_in ? `<img src="${item.signature_in}" class="signature-img">` : 'N/A';
-
-                    const timeOut = item.timestamp_out ? new Date(item.timestamp_out).toLocaleString() : 'N/A';
+                    <input type="text" id="key-number"
