@@ -1,0 +1,8 @@
+name = "key-register-worker"
+main = "index.js"
+compatibility_date = "2024-05-18"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "key-register-db" # Replace with your database name
+database_id = "77815214-8fc2-4142-8394-2af427139531" # Find this in the D1 dashboard
