@@ -329,7 +329,7 @@
     </div>
 
     <div class="footer">
-        <p>&copy; 2024 Your Company. All Rights Reserved.</p>
+        <p>&copy; 2025 OchreOnline. All Rights Reserved.</p>
         <p>Version: 1.0.0</p>
     </div>
 
@@ -442,11 +442,14 @@
             }
 
             try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData),
-                });
+                // This is what your code should look like in index.html
+                const response = await fetch(`${API_URL}/api/sign-out`, {
+                    method: 'POST', // <-- Check this line
+                    headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData),
+});
 
                 if (response.ok) {
                     alert(`Key successfully ${type === 'out' ? 'signed out' : 'returned'}.`);
