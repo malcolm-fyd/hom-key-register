@@ -1,6 +1,6 @@
 name = "hom-key-register"
 main = "worker.js"
-compatibility_date = "2025-09-08"
+compatibility_date = "2025-09-07"
 
 [[d1_databases]]
 binding = "DB"
