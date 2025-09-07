@@ -277,7 +277,7 @@
                     <label for="return-key-number">Key Number</label>
                     <input type="text" id="return-key-number" name="return-key-number" required>
                 </div>
-                <button type="button" id="sign-in-button" class="btn btn-primary">Sign In</button>
+                <button type="button" id="sign-in-button" class="btn btn-primary">Return</button>
                 <input type="hidden" id="signature-in-data">
             </form>
         </div>
@@ -329,17 +329,16 @@
     </div>
 
     <div class="footer">
-        <p>&copy; 2025 OchreOnline. All Rights Reserved.</p>
+        <p>&copy; 2024 Your Company. All Rights Reserved.</p>
         <p>Version: 1.0.0</p>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
 
     <script>
-        const API_URL = window.location.origin; // This will use the same URL as the page
+        const API_URL = window.location.origin;
 
         // --- View & Navigation Logic ---
-        const mainContainer = document.getElementById('main-container');
         const signOutFormSection = document.getElementById('sign-out-form');
         const signInFormSection = document.getElementById('sign-in-form');
         const reportPageSection = document.getElementById('report-page');
@@ -442,14 +441,13 @@
             }
 
             try {
-                // This is what your code should look like in index.html
-                const response = await fetch(`${API_URL}/api/sign-out`, {
-                    method: 'POST', // <-- Check this line
-                    headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-});
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData),
+                });
+
+                const responseData = await response.json();
 
                 if (response.ok) {
                     alert(`Key successfully ${type === 'out' ? 'signed out' : 'returned'}.`);
@@ -458,8 +456,7 @@
                     document.getElementById('signature-out-data').value = '';
                     document.getElementById('signature-in-data').value = '';
                 } else {
-                    const errorData = await response.json();
-                    alert(`Error: ${errorData.message || response.statusText}`);
+                    alert(`Error: ${responseData.message || response.statusText}`);
                 }
             } catch (error) {
                 console.error('Submission failed:', error);
@@ -493,29 +490,7 @@
                 data.forEach(item => {
                     const row = document.createElement('tr');
                     
-                    const signatureOutImg = item.signature_data ? `<img src="${item.signature_data}" class="signature-img">` : 'N/A';
+                    const signatureOutImg = item.signature_out ? `<img src="${item.signature_out}" class="signature-img">` : 'N/A';
                     const signatureInImg = item.signature_in ? `<img src="${item.signature_in}" class="signature-img">` : 'N/A';
 
-                    row.innerHTML = `
-                        <td>${new Date(item.timestamp_out).toLocaleString()}</td>
-                        <td>${item.name}</td>
-                        <td>${item.business}</td>
-                        <td>${item.mobile}</td>
-                        <td>${item.key_number}</td>
-                        <td>${item.key_type}${item.apartment_number ? ` (#${item.apartment_number})` : ''}</td>
-                        <td>${signatureOutImg}</td>
-                        <td>${item.timestamp_in ? new Date(item.timestamp_in).toLocaleString() : 'Not Returned'}</td>
-                        <td>${signatureInImg}</td>
-                        <td>${item.status}</td>
-                    `;
-                    reportBody.appendChild(row);
-                });
-
-            } catch (error) {
-                console.error('Error generating report:', error);
-                document.getElementById('report-body').innerHTML = `<tr><td colspan="10">Error loading report. Please check the console for details.</td></tr>`;
-            }
-        }
-    </script>
-</body>
-</html>
+                    const timeOut = item.timestamp_out ? new Date(item.timestamp_out).toLocaleString() : 'N/A';
