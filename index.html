@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Key Sign-Out Register</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background-color: #1a202c; /* Dark background */
+        }
+        #signatureCanvas {
+            border: 2px solid #4a5568;
+            border-radius: 0.5rem;
+            cursor: crosshair;
+            touch-action: none;
+            width: 100%;
+            height: 200px;
+        }
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+            .hide-on-print {
+                display: none;
+            }
+            .report-container {
+                display: block !important;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            .report-table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+            .report-table th, .report-table td {
+                border: 1px solid #ddd;
+                padding: 8px;
+            }
+            .report-table th {
+                background-color: #f2f2f2;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 flex flex-col items-center justify-center p-4 min-h-screen">
+    <div class="max-w-4xl w-full bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-10 transition-all duration-300 ease-in-out">
+        
+        <!-- Header & Navigation -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 border-b border-gray-700 pb-4 hide-on-print">
+            <h1 class="text-3xl md:text-4xl font-bold text-teal-400 mb-4 md:mb-0">Key Register</h1>
+            <div class="flex space-x-3">
+                <button id="showFormBtn" class="bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-6 rounded-full shadow-lg transition duration-200">
+                    Sign Out Key
+                </button>
+                <button id="showReportBtn" class="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-6 rounded-full shadow-lg transition duration-200">
+                    View Reports
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Form Section -->
+        <div id="formSection" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Name & Business -->
+                <div>
+                    <label for="name" class="block text-sm font-medium mb-1">Name</label>
+                    <input type="text" id="name" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors" placeholder="Full Name" required>
+                </div>
+                <div>
+                    <label for="business" class="block text-sm font-medium mb-1">Business</label>
+                    <input type="text" id="business" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors" placeholder="Company or Business Name" required>
+                </div>
+                <!-- Mobile Number & Key Number -->
+                <div>
+                    <label for="mobileNumber" class="block text-sm font-medium mb-1">Mobile Number</label>
+                    <input type="tel" id="mobileNumber" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors" placeholder="e.g., 0412 345 678" required>
+                </div>
+                <div>
+                    <label for="keyNumber" class="block text-sm font-medium mb-1">Key Number</label>
+                    <input type="text" id="keyNumber" class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors" placeholder="Key ID" required>
+                </div>
+            </div>
+
+            <!-- Key Type Selection -->
+            <div class="bg-gray-700 p-6 rounded-lg">
+                <label class="block text-sm font-medium mb-3">Key Type</label>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="flex items-center">
+                        <input type="radio" id="keyTypeLift" name="keyType" value="Lift" class="form-radio text-teal-500 focus:ring-teal-500" checked>
+                        <label for="keyTypeLift" class="ml-2">Lift</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="keyTypeMaster" name="keyType" value="Master" class="form-radio text-teal-500 focus:ring-teal-500">
+                        <label for="keyTypeMaster" class="ml-2">Master</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="keyTypeRoof" name="keyType" value="Roof" class="form-radio text-teal-500 focus:ring-teal-500">
+                        <label for="keyTypeRoof" class="ml-2">Roof</label>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="radio" id="keyTypeApartment" name="keyType" value="Apartment" class="form-radio text-teal-500 focus:ring-teal-500">
+                        <label for="keyTypeApartment" class="ml-2">Apartment</label>
+                    </div>
+                </div>
+                <div id="apartmentNumberInput" class="mt-4 hidden">
+                    <label for="apartmentNumber" class="block text-sm font-medium mb-1">Apartment Number</label>
+                    <input type="text" id="apartmentNumber" class="w-full p-3 bg-gray-600 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 transition-colors" placeholder="e.g., 123">
+                </div>
+            </div>
+            
+            <!-- Signature Pad -->
+            <div>
+                <label class="block text-sm font-medium mb-1">Signature</label>
+                <div class="relative bg-gray-700 rounded-lg overflow-hidden">
+                    <canvas id="signatureCanvas" class="w-full h-48"></canvas>
+                    <div class="absolute bottom-2 right-2">
+                        <button id="clearSignatureBtn" class="bg-red-500 hover:bg-red-600 text-white text-xs font-semibold py-1 px-3 rounded-full transition duration-200">
+                            Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button id="submitBtn" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-200">
+                Sign Out Key
+            </button>
+        </div>
+
+        <!-- Report Section (initially hidden) -->
+        <div id="reportSection" class="hidden report-container">
+            <h2 class="text-2xl font-semibold mb-4 text-center">Key Sign-Out Report</h2>
+            <div id="reportContent" class="overflow-x-auto">
+                <!-- Report table will be dynamically generated here -->
+            </div>
+            <div class="mt-8 flex justify-center hide-on-print">
+                <button id="printReportBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-200">
+                    Print Report
+                </button>
+            </div>
+        </div>
+
+        <!-- Message/Status Box -->
+        <div id="messageBox" class="hidden mt-6 p-4 rounded-lg text-center" role="alert"></div>
+    </div>
+
+    <script>
+        const formSection = document.getElementById('formSection');
+        const reportSection = document.getElementById('reportSection');
+        const showFormBtn = document.getElementById('showFormBtn');
+        const showReportBtn = document.getElementById('showReportBtn');
+        const submitBtn = document.getElementById('submitBtn');
+        const printReportBtn = document.getElementById('printReportBtn');
+        const apartmentNumberInput = document.getElementById('apartmentNumberInput');
+        const keyTypeRadios = document.querySelectorAll('input[name="keyType"]');
+        const messageBox = document.getElementById('messageBox');
+        
+        // --- Signature Pad Logic ---
+        const canvas = document.getElementById('signatureCanvas');
+        const ctx = canvas.getContext('2d');
+        const clearSignatureBtn = document.getElementById('clearSignatureBtn');
+        let drawing = false;
+
+        const setCanvasSize = () => {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 4;
+        };
+
+        window.addEventListener('resize', setCanvasSize);
+        setCanvasSize();
+
+        const getTouchPos = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0] || e.changedTouches[0];
+            return {
+                x: touch.clientX - rect.left,
+                y: touch.clientY - rect.top
+            };
+        };
+
+        const startDrawing = (e) => {
+            drawing = true;
+            ctx.beginPath();
+            if (e.touches) {
+                const pos = getTouchPos(e);
+                ctx.moveTo(pos.x, pos.y);
+            } else {
+                ctx.moveTo(e.offsetX, e.offsetY);
+            }
+        };
+
+        const draw = (e) => {
+            if (!drawing) return;
+            if (e.touches) {
+                const pos = getTouchPos(e);
+                ctx.lineTo(pos.x, pos.y);
+            } else {
+                ctx.lineTo(e.offsetX, e.offsetY);
+            }
+            ctx.stroke();
+        };
+
+        const stopDrawing = () => {
+            drawing = false;
+        };
+
+        // Mouse events
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        // Touch events for iPad support
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startDrawing(e);
+        });
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            draw(e);
+        });
+        canvas.addEventListener('touchend', stopDrawing);
+
+        clearSignatureBtn.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+        
+        const isCanvasEmpty = () => {
+            const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            for (let i = 0; i < pixels.length; i++) {
+                if (pixels[i] !== 0) return false;
+            }
+            return true;
+        };
+
+        // --- View & Form Logic ---
+        const showView = (view) => {
+            if (view === 'form') {
+                formSection.classList.remove('hidden');
+                reportSection.classList.add('hidden');
+            } else {
+                formSection.classList.add('hidden');
+                reportSection.classList.remove('hidden');
+            }
+        };
+
+        showFormBtn.addEventListener('click', () => showView('form'));
+        showReportBtn.addEventListener('click', () => {
+            showView('report');
+            generateReport();
+        });
+
+        // Toggle apartment number input
+        keyTypeRadios.forEach(radio => {
+            radio.addEventListener('change', () => {
+                if (radio.value === 'Apartment') {
+                    apartmentNumberInput.classList.remove('hidden');
+                } else {
+                    apartmentNumberInput.classList.add('hidden');
+                }
+            });
+        });
+
+        // Form submission
+        submitBtn.addEventListener('click', () => {
+            const name = document.getElementById('name').value;
+            const business = document.getElementById('business').value;
+            const mobileNumber = document.getElementById('mobileNumber').value;
+            const keyNumber = document.getElementById('keyNumber').value;
+            const keyType = document.querySelector('input[name="keyType"]:checked').value;
+            const apartmentNumber = keyType === 'Apartment' ? document.getElementById('apartmentNumber').value : '';
+            const signature = isCanvasEmpty() ? '' : canvas.toDataURL();
+            const timestamp = new Date().toLocaleString();
+
+            // Simple validation
+            if (!name || !business || !mobileNumber || !keyNumber || !signature) {
+                showMessage('Please fill in all required fields and provide a signature.', 'bg-red-500');
+                return;
+            }
+            if (!/^(\+?61|0)4\d{8}$/.test(mobileNumber.replace(/\s/g, ''))) {
+                showMessage('Please enter a valid Australian mobile number.', 'bg-red-500');
+                return;
+            }
+
+            const entry = {
+                name,
+                business,
+                mobileNumber,
+                keyNumber,
+                keyType,
+                apartmentNumber,
+                signature,
+                timestamp
+            };
+
+            // This is a placeholder for your Cloudflare Worker DB interaction.
+            // For a production app, you would replace this with a fetch call to your API endpoint.
+            // For example:
+            // fetch('/api/keys', { method: 'POST', body: JSON.stringify(entry) })
+            //   .then(response => response.json())
+            //   .then(data => {
+            //     showMessage('Key signed out successfully!', 'bg-green-500');
+            //   })
+            //   .catch(error => {
+            //     showMessage('Failed to save data. Please try again.', 'bg-red-500');
+            //   });
+
+            try {
+                const existingEntries = JSON.parse(localStorage.getItem('keyRegisterEntries') || '[]');
+                existingEntries.push(entry);
+                localStorage.setItem('keyRegisterEntries', JSON.stringify(existingEntries));
+                showMessage('Key signed out successfully!', 'bg-green-500');
+                resetForm();
+            } catch (e) {
+                showMessage('Failed to save data to local storage. Please try again.', 'bg-red-500');
+            }
+        });
+        
+        function resetForm() {
+            document.getElementById('name').value = '';
+            document.getElementById('business').value = '';
+            document.getElementById('mobileNumber').value = '';
+            document.getElementById('keyNumber').value = '';
+            document.getElementById('apartmentNumber').value = '';
+            document.getElementById('keyTypeLift').checked = true;
+            apartmentNumberInput.classList.add('hidden');
+            clearSignatureBtn.click();
+        }
+
+        function showMessage(msg, colorClass) {
+            messageBox.textContent = msg;
+            messageBox.className = `mt-6 p-4 rounded-lg text-center ${colorClass} text-white`;
+            messageBox.classList.remove('hidden');
+            setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, 5000);
+        }
+
+        // --- Report Generation & Print Logic ---
+        function generateReport() {
+            const entries = JSON.parse(localStorage.getItem('keyRegisterEntries') || '[]');
+            const reportContent = document.getElementById('reportContent');
+
+            if (entries.length === 0) {
+                reportContent.innerHTML = '<p class="text-center text-gray-400">No keys have been signed out yet.</p>';
+                return;
+            }
+
+            const tableHtml = `
+                <table class="report-table w-full text-left bg-gray-700 rounded-lg overflow-hidden">
+                    <thead class="bg-gray-600">
+                        <tr>
+                            <th class="p-4 text-sm font-semibold text-gray-300">Name</th>
+                            <th class="p-4 text-sm font-semibold text-gray-300">Business</th>
+                            <th class="p-4 text-sm font-semibold text-gray-300">Mobile #</th>
+                            <th class="p-4 text-sm font-semibold text-gray-300">Key #</th>
+                            <th class="p-4 text-sm font-semibold text-gray-300">Key Type</th>
+                            <th class="p-4 text-sm font-semibold text-gray-300">Time</th>
+                            <th class="p-4 text-sm font-semibold text-gray-300 hide-on-print">Signature</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${entries.map(entry => `
+                            <tr class="border-t border-gray-600 hover:bg-gray-700 transition-colors">
+                                <td class="p-4 text-sm text-gray-200">${entry.name}</td>
+                                <td class="p-4 text-sm text-gray-200">${entry.business}</td>
+                                <td class="p-4 text-sm text-gray-200">${entry.mobileNumber}</td>
+                                <td class="p-4 text-sm text-gray-200">${entry.keyNumber}</td>
+                                <td class="p-4 text-sm text-gray-200">${entry.keyType}${entry.apartmentNumber ? ' (' + entry.apartmentNumber + ')' : ''}</td>
+                                <td class="p-4 text-sm text-gray-200">${entry.timestamp}</td>
+                                <td class="p-4 hide-on-print">
+                                    <img src="${entry.signature}" alt="Signature" class="w-24 h-12 object-contain" />
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            reportContent.innerHTML = tableHtml;
+        }
+
+        printReportBtn.addEventListener('click', () => {
+            window.print();
+        });
+
+    </script>
+</body>
+</html>
