@@ -1,5 +1,5 @@
 name = "hom-key-register"
-main = "index.js"
+main = "worker.js"
 compatibility_date = "2025-09-08"
 
 [[d1_databases]]
