@@ -4,7 +4,7 @@ compatibility_date = "2025-09-07"
 
 # This section creates the service binding to your Worker
 [[services]]
-binding = "WORKER_BINDING"
+binding = "MY_WORKER"
 service = "hom-key-register"
 
 # This section is for a Pages project with a static output
