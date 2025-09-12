@@ -21,7 +21,12 @@ export default {
         };
 
         if (request.method === 'POST' && path === '/api/sign-out') {
-            try {
+           //Remove this bit latter.
+            if (request.method === 'POST' && path === '/api/sign-out') {
+    return new Response("This is a test response.", { status: 200, headers: headers });
+}
+            
+            /*try {
                 const data = await request.json();
                 const { name, business, mobile, keyNumber, keyType, apartmentNumber } = data;
 
@@ -49,7 +54,9 @@ export default {
             } catch (error) {
                 console.error('Sign-out error:', error);
                 return new Response(JSON.stringify({ message: 'Error processing sign-out request' }), { status: 500, headers: headers });
-            }
+            }    
+            
+         To this bit   */
         }
 
         if (request.method === 'POST' && path === '/api/sign-in') {
