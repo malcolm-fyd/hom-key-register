@@ -3,6 +3,7 @@ export default {
         const url = new URL(request.url);
         const path = url.pathname;
 
+        // --- Handle CORS Preflight Requests ---
         if (request.method === 'OPTIONS') {
             return new Response(null, {
                 headers: {
@@ -13,6 +14,7 @@ export default {
             });
         }
 
+        // --- All other requests ---
         const headers = {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',
@@ -20,13 +22,9 @@ export default {
             'Access-Control-Allow-Headers': 'Content-Type',
         };
 
+        // API for signing a key out
         if (request.method === 'POST' && path === '/api/sign-out') {
-           //Remove this bit latter.
-            if (request.method === 'POST' && path === '/api/sign-out') {
-    return new Response("This is a test response.", { status: 200, headers: headers });
-}
-            
-            /*try {
+            try {
                 const data = await request.json();
                 const { name, business, mobile, keyNumber, keyType, apartmentNumber } = data;
 
@@ -54,11 +52,10 @@ export default {
             } catch (error) {
                 console.error('Sign-out error:', error);
                 return new Response(JSON.stringify({ message: 'Error processing sign-out request' }), { status: 500, headers: headers });
-            }    
-            
-         To this bit   */
+            }
         }
 
+        // API for returning a key
         if (request.method === 'POST' && path === '/api/sign-in') {
             try {
                 const data = await request.json();
@@ -91,6 +88,7 @@ export default {
             }
         }
 
+        // API for fetching the report data
         if (request.method === 'GET' && path === '/api/report') {
             try {
                 const { results } = await env.DB.prepare(
