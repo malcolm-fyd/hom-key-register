@@ -8,7 +8,7 @@ service = "hom-key-register"
 
 # This section is for a Pages project with a static output
 # [pages_build_output]
-# dir = "./"
+# dir = "./" 
 
 [[d1_databases]]
 binding = "DB"
