@@ -4,7 +4,7 @@ compatibility_date = "2025-09-13"
 
 [[services]]
 binding = "WORKER_BINDING"
-service = "hom-key-register"
+service = "hom-key-register-v2"
 
 [pages_build_output]
 dir = "./"
