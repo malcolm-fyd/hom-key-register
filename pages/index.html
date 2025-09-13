@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Key Sign Out Register</title>
+
     
     <style>
         body {
@@ -31,11 +32,23 @@
         .header {
             text-align: center;
             margin-bottom: 20px;
+            position: relative;
+            width: 100%;
         }
 
         .header img {
             width: 150px;
             height: auto;
+        }
+
+        .header .btn-secondary {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            padding: 10px 20px;
+            margin: 0;
+            font-size: 0.9em;
         }
 
         .form-card {
@@ -207,6 +220,7 @@
 <body>
 
     <div class="header">
+        <a href="https://index-page-275.pages.dev/" class="btn btn-secondary" style="text-decoration: none;">Index / Services</a>
         <img src="/logo.png" alt="Company Logo">
     </div>
 
@@ -305,7 +319,7 @@
     </div>
 
     <script>
-        const API_URL = "https://hom-key-register.malcolm-164.workers.dev/"; // Remember to replace this with your actual URL
+        const API_URL = "https://your-worker-name.workers.dev"; // Remember to replace this with your actual URL
 
         const signOutFormSection = document.getElementById('sign-out-form');
         const signInFormSection = document.getElementById('sign-in-form');
@@ -317,24 +331,64 @@
         const filterButton = document.getElementById('filter-button');
         const startDateInput = document.getElementById('start-date');
         const endDateInput = document.getElementById('end-date');
-
-
-        document.getElementById('show-sign-out-btn').addEventListener('click', () => {
+        
+        let inactivityTimeout;
+        const inactivityDuration = 120000; // 2 minutes in milliseconds
+        
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimeout);
+            inactivityTimeout = setTimeout(() => {
+                // Check which section is active
+                if (signOutFormSection.style.display !== 'none') {
+                    // If on the Sign Out page, return to the Index site
+                    window.location.href = "https://index-page-275.pages.dev/";
+                } else if (signInFormSection.style.display !== 'none' || reportPageSection.style.display !== 'none') {
+                    // If on Return Key or Report page, return to the Sign Out form
+                    showSignOutForm();
+                }
+            }, inactivityDuration);
+        }
+        
+        function showSignOutForm() {
             signOutFormSection.style.display = 'block';
             signInFormSection.style.display = 'none';
             reportPageSection.style.display = 'none';
-        });
-
-        document.getElementById('show-sign-in-btn').addEventListener('click', () => {
+            resetInactivityTimer();
+        }
+        
+        function showSignInForm() {
             signOutFormSection.style.display = 'none';
             signInFormSection.style.display = 'block';
             reportPageSection.style.display = 'none';
-        });
-
-        document.getElementById('show-report-btn').addEventListener('click', async () => {
+            resetInactivityTimer();
+        }
+        
+        function showReportPage() {
             signOutFormSection.style.display = 'none';
             signInFormSection.style.display = 'none';
             reportPageSection.style.display = 'block';
+            resetInactivityTimer();
+        }
+
+        // Add event listeners to reset the timer on user activity
+        document.addEventListener('mousemove', resetInactivityTimer);
+        document.addEventListener('keypress', resetInactivityTimer);
+        document.addEventListener('touchstart', resetInactivityTimer);
+        
+        // Initial timer start
+        resetInactivityTimer();
+
+
+        document.getElementById('show-sign-out-btn').addEventListener('click', () => {
+            showSignOutForm();
+        });
+
+        document.getElementById('show-sign-in-btn').addEventListener('click', () => {
+            showSignInForm();
+        });
+
+        document.getElementById('show-report-btn').addEventListener('click', async () => {
+            showReportPage();
             await generateReport();
         });
         
@@ -389,6 +443,7 @@
                 console.error('Submission failed:', error);
                 alert('An error occurred. Please try again.');
             }
+            resetInactivityTimer();
         }
 
         document.getElementById('key-type').addEventListener('change', (e) => {
@@ -407,7 +462,6 @@
             queryParams.append('endDate', endDate);
             
             const reportUrl = `${API_URL}api/report?${queryParams.toString()}`;
-
 
             try {
                 const response = await fetch(reportUrl);
