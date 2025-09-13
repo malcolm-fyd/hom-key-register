@@ -59,6 +59,25 @@
             text-align: center;
             margin-bottom: 20px;
         }
+        
+        .report-controls {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .report-controls label, .report-controls input {
+            font-size: 1em;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        .report-controls button {
+            padding: 10px 20px;
+        }
 
         .report-table {
             width: 100%;
@@ -243,6 +262,13 @@
 
         <div id="report-page" class="report-page">
             <h2>Key Activity Report</h2>
+            <div class="report-controls">
+                <label for="start-date">Start Date:</label>
+                <input type="date" id="start-date">
+                <label for="end-date">End Date:</label>
+                <input type="date" id="end-date">
+                <button id="filter-button" class="btn btn-primary">Filter</button>
+            </div>
             <p id="report-date"></p>
             <table class="report-table">
                 <thead>
@@ -279,8 +305,7 @@
     </div>
 
     <script>
-        // Replace this URL with your actual Worker's URL
-        const API_URL = "https://hom-key-register.malcolm-164.workers.dev";
+        const API_URL = "https://hom-key-register.malcolm-164.workers.dev/"; // Remember to replace this with your actual URL
 
         const signOutFormSection = document.getElementById('sign-out-form');
         const signInFormSection = document.getElementById('sign-in-form');
@@ -289,6 +314,10 @@
         const signInButton = document.getElementById('sign-in-submit-button');
         const keyForm = document.getElementById('key-form');
         const returnForm = document.getElementById('return-form');
+        const filterButton = document.getElementById('filter-button');
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+
 
         document.getElementById('show-sign-out-btn').addEventListener('click', () => {
             signOutFormSection.style.display = 'block';
@@ -307,6 +336,10 @@
             signInFormSection.style.display = 'none';
             reportPageSection.style.display = 'block';
             await generateReport();
+        });
+        
+        filterButton.addEventListener('click', async () => {
+             await generateReport();
         });
 
         signOutButton.addEventListener('click', () => submitForm('out'));
@@ -365,9 +398,19 @@
         async function generateReport() {
             document.getElementById('report-body').innerHTML = '<tr><td colspan="8">Loading data...</td></tr>';
             document.getElementById('report-date').textContent = `Report generated on ${new Date().toLocaleString()}`;
+            
+            const startDate = startDateInput.value ? new Date(startDateInput.value).getTime() : 0;
+            const endDate = endDateInput.value ? new Date(endDateInput.value).getTime() + 86399999 : Date.now();
+            
+            const queryParams = new URLSearchParams();
+            queryParams.append('startDate', startDate);
+            queryParams.append('endDate', endDate);
+            
+            const reportUrl = `${API_URL}/api/report?${queryParams.toString()}`;
+
 
             try {
-                const response = await fetch(`${API_URL}/api/report`);
+                const response = await fetch(reportUrl);
                 if (!response.ok) throw new Error('Failed to fetch report data.');
                 
                 const data = await response.json();
@@ -375,7 +418,7 @@
                 reportBody.innerHTML = '';
 
                 if (data.length === 0) {
-                    reportBody.innerHTML = '<tr><td colspan="8">No key activity found.</td></tr>';
+                    reportBody.innerHTML = '<tr><td colspan="8">No key activity found for this date range.</td></tr>';
                     return;
                 }
 
