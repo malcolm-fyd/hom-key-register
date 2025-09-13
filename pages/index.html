@@ -360,13 +360,13 @@
                 formData.keyType = document.getElementById('key-type').value;
                 const aptInput = document.getElementById('apartment-number');
                 formData.apartmentNumber = aptInput.style.display === 'block' ? aptInput.value : '';
-                url = `${API_URL}/api/sign-out`;
+                url = `${API_URL}api/sign-out`;
             } else if (type === 'in') {
                 if (!returnForm.reportValidity()) {
                     return;
                 }
                 formData.keyNumber = document.getElementById('return-key-number').value;
-                url = `${API_URL}/api/sign-in`;
+                url = `${API_URL}api/sign-in`;
             }
 
             try {
