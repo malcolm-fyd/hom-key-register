@@ -1,8 +1,10 @@
 name = "hom-key-register"
-main = "worker.js"
-compatibility_date = "2025-09-07"
 
-[[d1_databases]]
-binding = "DB"
-database_name = "key-register-db" # Replace with your database name
-database_id = "77815214-8fc2-4142-8394-2af427139531" # Find this in the D1 dashboard
+compatibility_date = "2025-09-13"
+
+[[services]]
+binding = "WORKER_BINDING"
+service = "hom-key-register"
+
+[pages_build_output]
+dir = "./"
