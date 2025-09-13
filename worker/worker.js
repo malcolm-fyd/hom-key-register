@@ -91,11 +91,15 @@ export default {
         // API for fetching the report data
         if (request.method === 'GET' && path === '/api/report') {
             try {
+                const startDate = url.searchParams.get('startDate') ? parseInt(url.searchParams.get('startDate')) : 0;
+                const endDate = url.searchParams.get('endDate') ? parseInt(url.searchParams.get('endDate')) : Date.now();
+                
                 const { results } = await env.DB.prepare(
                     `SELECT name, business, mobile, key_number, key_type, apartment_number, timestamp_out, timestamp_in, status
                      FROM key_log
+                     WHERE timestamp_out >= ? AND timestamp_out <= ?
                      ORDER BY timestamp_out DESC`
-                ).all();
+                ).bind(startDate, endDate).all();
 
                 return new Response(JSON.stringify(results), { status: 200, headers: headers });
             } catch (error) {
