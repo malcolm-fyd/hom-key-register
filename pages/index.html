@@ -32,7 +32,6 @@
         .header {
             text-align: center;
             margin-bottom: 20px;
-            position: relative;
             width: 100%;
         }
 
@@ -41,16 +40,31 @@
             height: auto;
         }
 
-        .header .btn-secondary {
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
+        /* NEW STYLE FOR THE BUTTON CONTAINER */
+        .services-button-container {
+            width: 100%;
+            max-width: 600px;
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .btn-secondary {
+            background-color: #e0e0e0;
+            color: #333;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
             padding: 10px 20px;
-            margin: 0;
             font-size: 0.9em;
         }
 
+        .btn-secondary:hover {
+            background-color: #d0d0d0;
+        }
+        
         .form-card {
             background-color: #ffffff;
             padding: 30px;
@@ -71,25 +85,6 @@
             font-size: 2em;
             text-align: center;
             margin-bottom: 20px;
-        }
-        
-        .report-controls {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .report-controls label, .report-controls input {
-            font-size: 1em;
-            padding: 8px;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-        
-        .report-controls button {
-            padding: 10px 20px;
         }
 
         .report-table {
@@ -179,15 +174,6 @@
             background-color: #403eac;
         }
 
-        .btn-secondary {
-            background-color: #e0e0e0;
-            color: #333;
-        }
-
-        .btn-secondary:hover {
-            background-color: #d0d0d0;
-        }
-
         .footer {
             width: 100%;
             text-align: center;
@@ -220,8 +206,11 @@
 <body>
 
     <div class="header">
-        <a href="https://index-page-275.pages.dev/" class="btn btn-secondary" style="text-decoration: none;">Index / Services</a>
         <img src="/logo.png" alt="Company Logo">
+    </div>
+    
+    <div class="services-button-container">
+        <a href="https://index-page-275.pages.dev/" class="btn btn-secondary">Index / Services</a>
     </div>
 
     <div class="container" id="main-container">
@@ -319,7 +308,7 @@
     </div>
 
     <script>
-        const API_URL = "https://hom-key-register.malcolm-164.workers.dev/"; // Remember to replace this with your actual URL
+        const API_URL = "https://hom-key-register.malcolm-164.workers.dev"; // Remember to replace this with your actual URL
 
         const signOutFormSection = document.getElementById('sign-out-form');
         const signInFormSection = document.getElementById('sign-in-form');
@@ -414,13 +403,13 @@
                 formData.keyType = document.getElementById('key-type').value;
                 const aptInput = document.getElementById('apartment-number');
                 formData.apartmentNumber = aptInput.style.display === 'block' ? aptInput.value : '';
-                url = `${API_URL}api/sign-out`;
+                url = `${API_URL}/api/sign-out`;
             } else if (type === 'in') {
                 if (!returnForm.reportValidity()) {
                     return;
                 }
                 formData.keyNumber = document.getElementById('return-key-number').value;
-                url = `${API_URL}api/sign-in`;
+                url = `${API_URL}/api/sign-in`;
             }
 
             try {
