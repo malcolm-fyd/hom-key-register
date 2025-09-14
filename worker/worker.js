@@ -31,6 +31,15 @@ export default {
                 if (!name || !mobile || !keyNumber || !keyType) {
                     return new Response(JSON.stringify({ message: 'Missing required fields' }), { status: 400, headers: headers });
                 }
+                
+                // NEW: Check if the key is already signed out
+                const existingKey = await env.DB.prepare(
+                    `SELECT status FROM key_log WHERE key_number = ? AND status = 'OUT'`
+                ).bind(keyNumber).first();
+                
+                if (existingKey) {
+                    return new Response(JSON.stringify({ message: `Key ${keyNumber} is already signed out.` }), { status: 409, headers: headers });
+                }
 
                 const stmt = env.DB.prepare(
                     `INSERT INTO key_log (name, business, mobile, key_number, key_type, apartment_number, timestamp_out, status)
@@ -91,15 +100,11 @@ export default {
         // API for fetching the report data
         if (request.method === 'GET' && path === '/api/report') {
             try {
-                const startDate = url.searchParams.get('startDate') ? parseInt(url.searchParams.get('startDate')) : 0;
-                const endDate = url.searchParams.get('endDate') ? parseInt(url.searchParams.get('endDate')) : Date.now();
-                
                 const { results } = await env.DB.prepare(
                     `SELECT name, business, mobile, key_number, key_type, apartment_number, timestamp_out, timestamp_in, status
                      FROM key_log
-                     WHERE timestamp_out >= ? AND timestamp_out <= ?
                      ORDER BY timestamp_out DESC`
-                ).bind(startDate, endDate).all();
+                ).all();
 
                 return new Response(JSON.stringify(results), { status: 200, headers: headers });
             } catch (error) {
